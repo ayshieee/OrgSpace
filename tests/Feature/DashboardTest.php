@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Organization;
+use App\Models\OrganizationMember;
 use App\Models\User;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -8,16 +10,70 @@ test('guests are redirected to the login page', function () {
          ->assertRedirect('/login');
 });
 
-test('authenticated users can view the dashboard', function () {
-    // 1. Create a dummy user
+test('users with no organization are redirected to get started', function () {
     $user = User::factory()->create();
 
-    // 2. Act as that user and hit the dashboard route
     $this->actingAs($user)
          ->get('/dashboard')
-         ->assertOk() // Assert we get a 200 OK status
+         ->assertRedirect(route('get-started.show'));
+});
+
+test('authenticated users with an active organization see the organizations hub', function () {
+    $user = User::factory()->create();
+
+    $organization = Organization::create([
+        'name' => 'Test Org',
+        'slug' => 'test-org',
+        'status' => 'active',
+    ]);
+
+    OrganizationMember::create([
+        'organization_id' => $organization->id,
+        'user_id' => $user->id,
+        'is_active' => true,
+    ]);
+
+    $this->actingAs($user)
+         ->get('/dashboard')
+         ->assertOk()
          ->assertInertia(fn (Assert $page) => $page
-             // 3. Assert the exact Vue component name is returned
+             ->component('Organizations/Hub')
+         );
+});
+
+test('a member can view their organization\'s own dashboard', function () {
+    $user = User::factory()->create();
+
+    $organization = Organization::create([
+        'name' => 'Test Org',
+        'slug' => 'test-org',
+        'status' => 'active',
+    ]);
+
+    OrganizationMember::create([
+        'organization_id' => $organization->id,
+        'user_id' => $user->id,
+        'is_active' => true,
+    ]);
+
+    $this->actingAs($user)
+         ->get("/organizations/{$organization->id}/dashboard")
+         ->assertOk()
+         ->assertInertia(fn (Assert $page) => $page
              ->component('Dashboard')
          );
+});
+
+test('a non-member is forbidden from viewing another organization\'s dashboard', function () {
+    $user = User::factory()->create();
+
+    $organization = Organization::create([
+        'name' => 'Other Org',
+        'slug' => 'other-org',
+        'status' => 'active',
+    ]);
+
+    $this->actingAs($user)
+         ->get("/organizations/{$organization->id}/dashboard")
+         ->assertForbidden();
 });

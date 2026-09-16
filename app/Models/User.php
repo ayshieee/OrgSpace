@@ -55,4 +55,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(OrganizationMember::class);
     }
+
+    public function hasAnyOrganization(): bool
+    {
+        return $this->organizationMemberships()->exists();
+    }
+
+    public function joinRequests()
+    {
+        return $this->hasMany(OrganizationJoinRequest::class);
+    }
 }

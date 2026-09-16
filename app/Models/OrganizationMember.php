@@ -31,4 +31,9 @@ class OrganizationMember extends Model
     {
         return $this->belongsToMany(Role::class, 'organization_member_role');
     }
+
+    public function hasPermission(string $key): bool
+    {
+        return $this->roles->contains(fn (Role $role) => $role->hasPermission($key));
+    }
 }
