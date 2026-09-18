@@ -204,7 +204,7 @@ function removeExistingMember(id) {
                 <p class="text-sm font-semibold text-tertiary-700">Drag and drop your file here</p>
                 <p class="text-xs text-tertiary-400 mt-1">Supports .xlsx, .xls, .csv up to 10MB</p>
                 <button type="button" @click="fileInput.click()" :disabled="checking"
-                    class="mt-4 inline-flex items-center rounded-md border border-transparent bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white hover:bg-primary-700 disabled:opacity-50">
+                    class="mt-4 inline-flex items-center rounded-lg border border-transparent bg-gradient-to-b from-secondary-400 to-secondary-500 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-tertiary-900 shadow-soft transition-all duration-200 ease-ios hover:shadow-elevated hover:from-secondary-300 hover:to-secondary-400 active:scale-[0.98] disabled:opacity-50">
                     {{ checking ? 'Checking…' : 'Browse Files' }}
                 </button>
                 <input ref="fileInput" type="file" accept=".xlsx,.xls,.csv" class="hidden" @change="onFileChange" />
@@ -217,7 +217,7 @@ function removeExistingMember(id) {
             </div>
 
             <div v-if="showManualEntry" class="space-y-3 border border-neutral-200 rounded-xl bg-white p-4">
-                <div v-for="(row, index) in manualRows" :key="index" class="flex gap-2 items-start">
+                <div v-for="(row, index) in manualRows" :key="index" class="flex flex-wrap gap-2 items-start">
                     <input v-model="row.first_name" placeholder="First Name" class="w-28 rounded border-tertiary-200 text-sm focus:border-primary-500 focus:ring-primary-500" />
                     <input v-model="row.m_i" placeholder="M.I." class="w-14 rounded border-tertiary-200 text-sm focus:border-primary-500 focus:ring-primary-500" />
                     <input v-model="row.surname" placeholder="Surname" class="w-32 rounded border-tertiary-200 text-sm focus:border-primary-500 focus:ring-primary-500" />

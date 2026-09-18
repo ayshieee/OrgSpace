@@ -14,11 +14,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\HandleInertiaRequests::class,
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
+            \App\Http\Middleware\EnsurePasswordIsCurrent::class,
         ]);
 
         $middleware->alias([
             'onboarding.step' => \App\Http\Middleware\EnsureOnboardingStep::class,
             'org.permission' => \App\Http\Middleware\EnsureOrganizationPermission::class,
+            'module.enabled' => \App\Http\Middleware\EnsureModuleEnabled::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

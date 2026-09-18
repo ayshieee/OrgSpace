@@ -73,9 +73,24 @@ class Organization extends Model
         return $this->hasMany(OrgFile::class);
     }
 
+    public function microsoftConnection()
+    {
+        return $this->hasOne(OrganizationMicrosoftConnection::class);
+    }
+
+    public function musicEntries()
+    {
+        return $this->hasMany(MusicEntry::class);
+    }
+
     public function isPublic(): bool
     {
         return $this->is_public === true;
+    }
+
+    public function hasModuleEnabled(string $moduleKey): bool
+    {
+        return $this->features()->where('module_key', $moduleKey)->where('is_enabled', true)->exists();
     }
 
     /**

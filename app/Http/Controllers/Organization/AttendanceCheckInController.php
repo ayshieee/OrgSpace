@@ -21,6 +21,13 @@ class AttendanceCheckInController extends Controller
         $session->load('organization');
         $user = $request->user();
 
+        $attendanceEnabled = $session->organization->features()
+            ->where('module_key', 'attendance')
+            ->where('is_enabled', true)
+            ->exists();
+
+        abort_unless($attendanceEnabled, 404);
+
         $member = $session->organization->members()
             ->where('user_id', $user->id)
             ->where('is_active', true)
@@ -34,9 +41,23 @@ class AttendanceCheckInController extends Controller
             ]);
         }
 
-        if ($session->isClosed()) {
+        $sessionStatus = $session->status();
+
+        if ($sessionStatus !== 'active') {
+            // Maps the session's real lifecycle state to what the member
+            // actually needs to know — "ended" (manually closed) and
+            // "expired" (ran past its own end_time) are told apart so a
+            // member isn't left thinking an officer cut them off when the
+            // window simply passed.
+            $checkInStatus = match ($sessionStatus) {
+                'ended' => 'closed',
+                'expired' => 'expired',
+                'scheduled' => 'not_started',
+                default => 'closed',
+            };
+
             return Inertia::render('Attendance/CheckIn', [
-                'status' => 'closed',
+                'status' => $checkInStatus,
                 'sessionTitle' => $session->title,
                 'organizationName' => $session->organization->name,
             ]);

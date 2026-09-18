@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class OrganizationMember extends Model
 {
@@ -15,6 +16,15 @@ class OrganizationMember extends Model
         'is_active' => 'boolean',
         'joined_at' => 'datetime',
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (OrganizationMember $member) {
+            if (! $member->qr_token) {
+                $member->qr_token = Str::random(32);
+            }
+        });
+    }
 
     public function user()
     {
@@ -35,5 +45,10 @@ class OrganizationMember extends Model
     public function hasPermission(string $key): bool
     {
         return $this->roles->contains(fn (Role $role) => $role->hasPermission($key));
+    }
+
+    public function favoritedMusic()
+    {
+        return $this->belongsToMany(MusicEntry::class, 'music_favorites');
     }
 }

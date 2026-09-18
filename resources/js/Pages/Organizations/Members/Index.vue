@@ -1,10 +1,12 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { Head, router } from '@inertiajs/vue3';
-import { MagnifyingGlassIcon, TrashIcon, UsersIcon, ShieldCheckIcon, ClipboardDocumentCheckIcon, ChartBarIcon } from '@heroicons/vue/24/outline';
+import { MagnifyingGlassIcon, TrashIcon, UsersIcon, ShieldCheckIcon, ClipboardDocumentCheckIcon, ChartBarIcon, ArrowDownTrayIcon, PlusIcon } from '@heroicons/vue/24/outline';
 import { CheckIcon as CheckIconSolid, XMarkIcon as XMarkIconSolid } from '@heroicons/vue/24/solid';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import StatCard from '@/Components/Dashboard/StatCard.vue';
+import MemberDetailDrawer from '@/Components/Organizations/MemberDetailDrawer.vue';
+import AddMemberModal from '@/Components/Organizations/AddMemberModal.vue';
 import { getInitials, colorForId } from '@/utils/initials';
 
 const props = defineProps({
@@ -20,6 +22,9 @@ const props = defineProps({
 const search = ref('');
 const processingId = ref(null);
 const selected = ref([]);
+const bulkRoleId = ref('');
+const viewing = ref(null);
+const showAddMember = ref(false);
 
 const filtered = computed(() => {
     const q = search.value.trim().toLowerCase();
@@ -66,6 +71,23 @@ function bulkRemove() {
     });
 }
 
+function bulkChangeRole() {
+    if (!selected.value.length || !bulkRoleId.value) return;
+    const roleId = bulkRoleId.value === 'none' ? null : bulkRoleId.value;
+    router.post(route('organizations.members.bulk-update-role', props.organization.id), { member_ids: selected.value, role_id: roleId }, {
+        preserveScroll: true,
+        onSuccess: () => {
+            selected.value = [];
+            bulkRoleId.value = '';
+        },
+    });
+}
+
+function exportSelected() {
+    const ids = selected.value.length ? `?ids=${selected.value.join(',')}` : '';
+    window.location.href = route('organizations.members.export', props.organization.id) + ids;
+}
+
 function respond(requestId, action) {
     processingId.value = requestId;
     router.post(route(`organizations.join-requests.${action}`, [props.organization.id, requestId]), {}, {
@@ -88,7 +110,7 @@ function respond(requestId, action) {
             <StatCard :icon="ChartBarIcon" tone="primary" label="Attendance Index" :value="stats.org_attendance_rate !== null ? `${stats.org_attendance_rate}%` : '—'" :caption="stats.org_attendance_rate !== null ? 'Average across all sessions' : 'No attendance sessions yet'" />
         </div>
 
-        <div v-if="canManage && pendingApprovals.length" class="bg-white border border-neutral-200 rounded-xl mb-6">
+        <div v-if="canManage && pendingApprovals.length" class="bg-white border border-neutral-200/60 rounded-2xl shadow-soft hover:shadow-elevated transition-shadow duration-300 mb-6">
             <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-100">
                 <h2 class="font-heading font-bold text-tertiary-900">Adviser Sign-off Queue</h2>
                 <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-secondary-100 text-secondary-700">{{ pendingApprovals.length }} Pending</span>
@@ -101,7 +123,7 @@ function respond(requestId, action) {
                     </div>
                     <div class="flex items-center gap-2 shrink-0">
                         <button type="button" :disabled="processingId === req.id" @click="respond(req.id, 'approve')"
-                            class="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary-700 disabled:opacity-50">
+                            class="inline-flex items-center gap-1 rounded-md bg-gradient-to-b from-secondary-400 to-secondary-500 px-3 py-1.5 text-xs font-semibold text-tertiary-900 shadow-sm transition-all duration-200 ease-ios hover:shadow-soft hover:from-secondary-300 hover:to-secondary-400 disabled:opacity-50">
                             <CheckIconSolid class="w-3.5 h-3.5" /> Approve
                         </button>
                         <button type="button" :disabled="processingId === req.id" @click="respond(req.id, 'deny')"
@@ -118,10 +140,27 @@ function respond(requestId, action) {
             <div class="flex items-center gap-3">
                 <div v-if="canManage && selected.length" class="flex items-center gap-2">
                     <span class="text-xs font-semibold text-tertiary-600">{{ selected.length }} selected</span>
+                    <select v-model="bulkRoleId" @change="bulkChangeRole"
+                        class="text-xs rounded-md border-neutral-200 focus:border-primary-500 focus:ring-primary-500 py-1.5">
+                        <option value="" disabled>Change role…</option>
+                        <option value="none">No role</option>
+                        <option v-for="role in roles" :key="role.id" :value="role.id">{{ role.name }}</option>
+                    </select>
+                    <button type="button" @click="exportSelected" class="inline-flex items-center gap-1 rounded-md border border-neutral-200 px-3 py-1.5 text-xs font-semibold text-tertiary-600 hover:bg-neutral-50">
+                        <ArrowDownTrayIcon class="w-3.5 h-3.5" /> Export Selected
+                    </button>
                     <button type="button" @click="bulkRemove" class="inline-flex items-center gap-1 rounded-md border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50">
                         <TrashIcon class="w-3.5 h-3.5" /> Remove Selected
                     </button>
                 </div>
+                <button v-else-if="canManage" type="button" @click="exportSelected"
+                    class="inline-flex items-center gap-1 rounded-md border border-neutral-200 px-3 py-1.5 text-xs font-semibold text-tertiary-600 hover:bg-neutral-50">
+                    <ArrowDownTrayIcon class="w-3.5 h-3.5" /> Export All
+                </button>
+                <button v-if="canManage" type="button" @click="showAddMember = true"
+                    class="inline-flex items-center gap-1 rounded-md bg-gradient-to-b from-secondary-400 to-secondary-500 px-3 py-1.5 text-xs font-semibold text-tertiary-900 shadow-soft transition-all duration-200 ease-ios hover:shadow-elevated hover:from-secondary-300 hover:to-secondary-400 active:scale-[0.98]">
+                    <PlusIcon class="w-3.5 h-3.5" /> Add Member
+                </button>
                 <div class="relative">
                     <MagnifyingGlassIcon class="w-4 h-4 text-tertiary-300 absolute left-3 top-1/2 -translate-y-1/2" />
                     <input v-model="search" type="text" placeholder="Search members..."
@@ -130,7 +169,7 @@ function respond(requestId, action) {
             </div>
         </div>
 
-        <div class="bg-white border border-neutral-200 rounded-xl overflow-x-auto">
+        <div class="bg-white border border-neutral-200/60 rounded-2xl shadow-soft hover:shadow-elevated transition-shadow duration-300 overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
                     <tr class="border-b border-neutral-200 text-left text-[11px] font-bold uppercase tracking-wide text-tertiary-400">
@@ -146,15 +185,16 @@ function respond(requestId, action) {
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-neutral-100">
-                    <tr v-for="member in filtered" :key="member.id">
-                        <td v-if="canManage" class="pl-5 py-3">
+                    <tr v-for="member in filtered" :key="member.id" class="cursor-pointer hover:bg-neutral-50" @click="viewing = member">
+                        <td v-if="canManage" class="pl-5 py-3" @click.stop>
                             <input v-if="member.id !== currentMemberId" type="checkbox" :checked="selected.includes(member.id)" @change="toggleSelect(member.id)"
                                 class="rounded border-tertiary-300 text-primary-600 focus:ring-primary-500" />
                         </td>
                         <td class="px-3 py-3">
                             <div class="flex items-center gap-3 min-w-0">
-                                <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0" :class="colorForId(member.user_id)">
-                                    {{ getInitials(member.name) }}
+                                <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 overflow-hidden" :class="member.avatar_path ? '' : colorForId(member.user_id)">
+                                    <img v-if="member.avatar_path" :src="`/storage/${member.avatar_path}`" class="w-full h-full object-cover" :alt="member.name" />
+                                    <template v-else>{{ getInitials(member.name) }}</template>
                                 </div>
                                 <div class="min-w-0">
                                     <p class="font-semibold text-tertiary-800 truncate">
@@ -166,7 +206,7 @@ function respond(requestId, action) {
                             </div>
                         </td>
                         <td class="px-3 py-3 text-tertiary-500 font-mono text-xs">{{ member.membership_number ?? '—' }}</td>
-                        <td class="px-3 py-3">
+                        <td class="px-3 py-3" @click.stop>
                             <select v-if="canManage" :value="member.role_id ?? ''" @change="changeRole(member, $event.target.value)"
                                 class="text-xs rounded-md border-neutral-200 focus:border-primary-500 focus:ring-primary-500 py-1.5">
                                 <option value="">No role</option>
@@ -180,7 +220,7 @@ function respond(requestId, action) {
                             </span>
                         </td>
                         <td class="px-3 py-3 text-tertiary-400 text-xs">{{ member.joined_at }}</td>
-                        <td v-if="canManage" class="px-3 py-3">
+                        <td v-if="canManage" class="px-3 py-3" @click.stop>
                             <button v-if="member.id !== currentMemberId" type="button" @click="removeMember(member)" class="text-tertiary-300 hover:text-red-500">
                                 <TrashIcon class="w-4 h-4" />
                             </button>
@@ -192,5 +232,10 @@ function respond(requestId, action) {
                 </tbody>
             </table>
         </div>
+
+        <MemberDetailDrawer v-if="viewing" :organization-id="organization.id" :member="viewing" :roles="roles"
+            :can-manage="canManage" :is-self="viewing.id === currentMemberId" @close="viewing = null" />
+
+        <AddMemberModal v-if="canManage" :show="showAddMember" :organization-id="organization.id" :roles="roles" @close="showAddMember = false" />
     </AuthenticatedLayout>
 </template>

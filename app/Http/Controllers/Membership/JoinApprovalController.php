@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Membership;
 use App\Http\Controllers\Controller;
 use App\Models\Organization;
 use App\Models\OrganizationJoinRequest;
+use App\Notifications\JoinRequestApproved;
+use App\Notifications\JoinRequestDenied;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
@@ -33,6 +35,8 @@ class JoinApprovalController extends Controller
             'responded_by' => $request->user()->id,
         ]);
 
+        $joinRequest->user->notify(new JoinRequestApproved($organization));
+
         return back()->with('success', 'Request approved — they now have access to the organization.');
     }
 
@@ -47,6 +51,8 @@ class JoinApprovalController extends Controller
             'responded_at' => now(),
             'responded_by' => $request->user()->id,
         ]);
+
+        $joinRequest->user->notify(new JoinRequestDenied($organization));
 
         return back()->with('success', 'Request denied.');
     }

@@ -23,6 +23,12 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'must_change_password',
+        'avatar_path',
+        'bio',
+        'pronouns',
+        'phone_number',
+        'location',
     ];
 
     /**
@@ -45,6 +51,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'must_change_password' => 'boolean',
         ];
     }
 
@@ -64,5 +71,10 @@ class User extends Authenticatable
     public function joinRequests()
     {
         return $this->hasMany(OrganizationJoinRequest::class);
+    }
+
+    public function educations()
+    {
+        return $this->hasMany(UserEducation::class);
     }
 }

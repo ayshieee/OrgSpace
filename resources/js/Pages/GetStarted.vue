@@ -1,9 +1,11 @@
 <script setup>
 import { Head, Link, usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
 import { BuildingOffice2Icon, UserGroupIcon } from '@heroicons/vue/24/outline';
 import OnboardingLayout from '@/Layouts/OnboardingLayout.vue';
 
-const user = usePage().props.auth.user;
+const page = usePage();
+const user = computed(() => page.props.auth.user);
 </script>
 
 <template>
@@ -21,7 +23,7 @@ const user = usePage().props.auth.user;
                 </div>
                 <h3 class="font-heading font-bold text-tertiary-900">Create an Organization</h3>
                 <p class="text-sm text-tertiary-500 mt-1 mb-5">Set up your organization's roles, features, and members from scratch.</p>
-                <span class="mt-auto inline-flex items-center justify-center w-full rounded-md border border-transparent bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white transition duration-150 ease-in-out group-hover:bg-primary-700">
+                <span class="mt-auto inline-flex items-center justify-center w-full rounded-lg border border-transparent bg-gradient-to-b from-secondary-400 to-secondary-500 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-tertiary-900 shadow-soft transition-all duration-200 ease-ios group-hover:shadow-elevated group-hover:from-secondary-300 group-hover:to-secondary-400">
                     Create Organization
                 </span>
             </Link>
@@ -33,7 +35,7 @@ const user = usePage().props.auth.user;
                 </div>
                 <h3 class="font-heading font-bold text-tertiary-900">Join an Organization</h3>
                 <p class="text-sm text-tertiary-500 mt-1 mb-5">Find your organization and request to join as a member.</p>
-                <span class="mt-auto inline-flex items-center justify-center w-full rounded-md border border-tertiary-200 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-widest text-tertiary-700 shadow-sm transition duration-150 ease-in-out group-hover:bg-neutral-100">
+                <span class="mt-auto inline-flex items-center justify-center w-full rounded-lg border border-secondary-400 bg-secondary-50 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-secondary-800 shadow-sm transition-all duration-200 ease-ios group-hover:bg-secondary-100 group-hover:border-secondary-500 group-hover:shadow-soft">
                     Find My Organization
                 </span>
             </Link>

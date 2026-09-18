@@ -56,7 +56,7 @@ const modules = [
                         <Link v-if="canLogin" :href="route('login')" class="text-sm font-medium text-tertiary-500 hover:text-tertiary-900">
                             Log in
                         </Link>
-                        <Link v-if="canRegister" :href="route('register')" class="bg-secondary text-tertiary-900 px-4 py-2 rounded-md text-sm font-semibold hover:bg-secondary-600 transition-colors shadow-sm">
+                        <Link v-if="canRegister" :href="route('register')" class="bg-gradient-to-b from-secondary-400 to-secondary-500 text-tertiary-900 px-4 py-2 rounded-lg text-sm font-semibold shadow-soft transition-all duration-200 ease-ios hover:shadow-elevated hover:from-secondary-300 hover:to-secondary-400 active:scale-[0.98]">
                             Get Started
                         </Link>
                     </div>
@@ -76,10 +76,10 @@ const modules = [
                             Empower your organization with a modular management system tailored to your specific needs. Choose your features, define your view, and lead with confidence.
                         </p>
                         <div class="mt-8 flex flex-wrap gap-4">
-                            <Link :href="route('register')" class="bg-tertiary text-white px-8 py-3 rounded-md text-base font-semibold hover:bg-tertiary-800 shadow-md transition-all">
+                            <Link :href="route('register')" class="bg-gradient-to-b from-secondary-400 to-secondary-500 text-tertiary-900 px-8 py-3 rounded-lg text-base font-semibold shadow-soft transition-all duration-200 ease-ios hover:shadow-elevated hover:from-secondary-300 hover:to-secondary-400 active:scale-[0.98]">
                                 Get Started
                             </Link>
-                            <a href="#how-it-works" class="bg-white text-tertiary-700 border border-neutral-300 px-8 py-3 rounded-md text-base font-semibold hover:bg-neutral-50 transition-all">
+                            <a href="#how-it-works" class="bg-secondary-50 text-secondary-800 border border-secondary-400 px-8 py-3 rounded-lg text-base font-semibold transition-all duration-200 ease-ios hover:bg-secondary-100 hover:border-secondary-500 hover:shadow-soft">
                                 See How it Works
                             </a>
                         </div>

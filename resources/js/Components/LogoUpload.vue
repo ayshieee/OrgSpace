@@ -5,6 +5,8 @@ import { PhotoIcon } from '@heroicons/vue/24/outline';
 const props = defineProps({
     modelValue: { type: [File, null], default: null },
     existingUrl: { type: String, default: null },
+    label: { type: String, default: 'Upload Logo' },
+    alt: { type: String, default: 'Logo preview' },
 });
 
 const emit = defineEmits(['update:modelValue']);
@@ -37,10 +39,10 @@ function onDrop(event) {
             @drop.prevent="onDrop"
             class="w-24 h-24 rounded-full border-2 border-dashed border-primary-300 bg-primary-50/40 flex flex-col items-center justify-center overflow-hidden hover:bg-primary-50 transition-colors"
         >
-            <img v-if="preview" :src="preview" class="w-full h-full object-cover" alt="Organization logo preview" />
+            <img v-if="preview" :src="preview" class="w-full h-full object-cover" :alt="alt" />
             <template v-else>
                 <PhotoIcon class="w-6 h-6 text-primary-400" />
-                <span class="mt-1 text-[10px] font-semibold text-primary-500">Upload Logo</span>
+                <span class="mt-1 text-[10px] font-semibold text-primary-500">{{ label }}</span>
             </template>
         </button>
         <input ref="input" type="file" accept="image/png,image/jpeg,image/webp" class="hidden" @change="onChange" />

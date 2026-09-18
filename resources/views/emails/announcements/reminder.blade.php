@@ -8,7 +8,7 @@
 
     <p>This is a reminder about an announcement from <strong>{{ $organizationName }}</strong> on OrgSpace that you haven't opened yet.</p>
 
-    <table style="border-left: 4px solid #0047AB; margin: 16px 0;" cellpadding="0" cellspacing="0">
+    <table style="border-left: 4px solid #2E418D; margin: 16px 0;" cellpadding="0" cellspacing="0">
         <tr>
             <td style="padding: 8px 16px;">
                 <p style="margin: 0 0 4px; font-weight: bold;">{{ $title }}</p>

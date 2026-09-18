@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\ComputesAttendanceEligibility;
 use App\Models\AttendanceRecord;
 use App\Models\Organization;
 use App\Models\OrganizationJoinRequest;
@@ -13,12 +14,7 @@ use Inertia\Response;
 
 class OrganizationHubController extends Controller
 {
-    /**
-     * Minimum attendance rate (%) for a member to count as "in good
-     * standing" on the reports card — an internal policy line, not
-     * something members configure themselves.
-     */
-    protected const ELIGIBILITY_THRESHOLD = 75;
+    use ComputesAttendanceEligibility;
 
     /**
      * "My Organizations" — the landing page after login. Groups every
@@ -140,40 +136,6 @@ class OrganizationHubController extends Controller
 
         $upcomingEvents = $organization->events()->where('starts_at', '>=', now())->count();
 
-        $attendanceTotals = AttendanceRecord::query()
-            ->whereIn('organization_member_id', $organization->members->pluck('id'))
-            ->selectRaw("COUNT(*) as total")
-            ->selectRaw("SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present_count")
-            ->first();
-
-        $attendanceIndex = $attendanceTotals && $attendanceTotals->total > 0
-            ? round(($attendanceTotals->present_count / $attendanceTotals->total) * 100, 1)
-            : null;
-
-        $eligibility = null;
-
-        if ($canViewReports) {
-            $rateByMember = AttendanceRecord::query()
-                ->whereIn('organization_member_id', $organization->members->pluck('id'))
-                ->select('organization_member_id')
-                ->selectRaw('COUNT(*) as total')
-                ->selectRaw("SUM(CASE WHEN status = 'present' THEN 1 ELSE 0 END) as present_count")
-                ->groupBy('organization_member_id')
-                ->get();
-
-            $membersWithData = $rateByMember->count();
-            $eligibleCount = $rateByMember->filter(
-                fn ($r) => ($r->present_count / $r->total) * 100 >= self::ELIGIBILITY_THRESHOLD
-            )->count();
-
-            $eligibility = [
-                'eligible' => $eligibleCount,
-                'total_with_data' => $membersWithData,
-                'percent' => $membersWithData > 0 ? round(($eligibleCount / $membersWithData) * 100, 1) : null,
-                'threshold' => self::ELIGIBILITY_THRESHOLD,
-            ];
-        }
-
         $moduleCatalog = config('modules');
         $featuresByKey = $organization->features->keyBy('module_key');
         $modules = collect($moduleCatalog)->map(fn ($def, $key) => [
@@ -181,6 +143,15 @@ class OrganizationHubController extends Controller
             'name' => $def['name'],
             'is_enabled' => (bool) optional($featuresByKey->get($key))->is_enabled,
         ])->values();
+
+        // The Attendance stat/eligibility only mean anything if the org has
+        // actually turned the module on — otherwise they'd show stale or
+        // misleading numbers for a feature the org has switched off.
+        $attendanceEnabled = (bool) optional($featuresByKey->get('attendance'))->is_enabled;
+
+        $attendanceIndex = $attendanceEnabled ? $this->computeAttendanceIndex($organization) : null;
+
+        $eligibility = ($canViewReports && $attendanceEnabled) ? $this->computeEligibility($organization) : null;
 
         $roleBreakdown = $organization->roles->map(function ($role) use ($organization, $totalMembers) {
             $count = $organization->members->filter(fn ($m) => $m->roles->contains('id', $role->id))->count();
@@ -270,7 +241,7 @@ class OrganizationHubController extends Controller
                 'logo_path' => $organization->logo_path,
             ],
             'canReview' => $canReview,
-            'canViewReports' => $canViewReports,
+            'canViewReports' => $canViewReports && $attendanceEnabled,
             'eligibility' => $eligibility,
             'stats' => [
                 'total_members' => $totalMembers,

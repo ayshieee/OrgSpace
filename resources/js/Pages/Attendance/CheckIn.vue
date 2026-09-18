@@ -1,9 +1,9 @@
 <script setup>
 import { Head } from '@inertiajs/vue3';
-import { CheckCircleIcon, ClockIcon, LockClosedIcon, NoSymbolIcon } from '@heroicons/vue/24/outline';
+import { CheckCircleIcon, ClockIcon, LockClosedIcon, NoSymbolIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/outline';
 
 const props = defineProps({
-    status: { type: String, required: true }, // checked_in | already_checked_in | closed | not_a_member
+    status: { type: String, required: true }, // checked_in | already_checked_in | closed | expired | not_started | not_a_member
     sessionTitle: { type: String, required: true },
     organizationName: { type: String, required: true },
     checkedInAt: { type: String, default: null },
@@ -13,6 +13,8 @@ const copy = {
     checked_in: { icon: CheckCircleIcon, tone: 'text-emerald-500', title: "You're checked in!" },
     already_checked_in: { icon: ClockIcon, tone: 'text-primary-500', title: 'Already checked in' },
     closed: { icon: LockClosedIcon, tone: 'text-tertiary-400', title: 'This session is closed' },
+    expired: { icon: ExclamationTriangleIcon, tone: 'text-amber-500', title: 'This session has expired' },
+    not_started: { icon: ClockIcon, tone: 'text-tertiary-400', title: "This session hasn't started yet" },
     not_a_member: { icon: NoSymbolIcon, tone: 'text-red-500', title: "You're not a member here" },
 }[props.status];
 </script>
@@ -35,6 +37,12 @@ const copy = {
             </p>
             <p class="mt-2 text-sm text-tertiary-500" v-else-if="status === 'closed'">
                 <span class="text-tertiary-800 font-semibold">{{ sessionTitle }}</span> has already been closed by an officer. If this is a mistake, ask them to reopen it.
+            </p>
+            <p class="mt-2 text-sm text-tertiary-500" v-else-if="status === 'expired'">
+                <span class="text-tertiary-800 font-semibold">{{ sessionTitle }}</span>'s check-in window has ended. Ask an officer if you still need to be marked present.
+            </p>
+            <p class="mt-2 text-sm text-tertiary-500" v-else-if="status === 'not_started'">
+                <span class="text-tertiary-800 font-semibold">{{ sessionTitle }}</span> hasn't opened for check-in yet. Try again once it starts.
             </p>
             <p class="mt-2 text-sm text-tertiary-500" v-else>
                 This QR code is for <span class="text-tertiary-800 font-semibold">{{ organizationName }}</span>, and you're not currently an active member there.

@@ -58,6 +58,15 @@ class HandleInertiaRequests extends Middleware
                 'organization' => $organization, // Send it to Vue!
                 'permissions' => $permissions,
                 'enabledModules' => $enabledModules,
+                'unread_notifications_count' => $user?->unreadNotifications()->count() ?? 0,
+            ],
+            // Every controller in this app flashes via back()->with('success', ...)
+            // / ->with('warning', ...) — this is what actually gets it in front
+            // of the user, instead of it sitting unread in the session.
+            'flash' => [
+                'success' => fn () => $request->session()->get('success'),
+                'warning' => fn () => $request->session()->get('warning'),
+                'error' => fn () => $request->session()->get('error'),
             ],
         ];
     }

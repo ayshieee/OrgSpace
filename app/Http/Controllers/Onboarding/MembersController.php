@@ -118,6 +118,7 @@ class MembersController extends Controller
                         'email' => $row['email'],
                         'password' => Hash::make($password),
                         'email_verified_at' => now(),
+                        'must_change_password' => true,
                     ]);
 
                     $newAccounts[] = ['user' => $user, 'password' => $password];
@@ -139,6 +140,8 @@ class MembersController extends Controller
             }
         });
 
+        $failedEmails = [];
+
         foreach ($newAccounts as $account) {
             try {
                 Mail::to($account['user']->email)->send(
@@ -146,12 +149,24 @@ class MembersController extends Controller
                 );
             } catch (\Throwable $e) {
                 report($e);
+                $failedEmails[] = $account['user']->email;
             }
         }
 
         $this->advanceTo($organization, 'features');
 
-        return $this->redirectToNextStep($request, 'onboarding.features.show');
+        $response = $this->redirectToNextStep($request, 'onboarding.features.show');
+
+        // The accounts and memberships above are real and already committed —
+        // a failed email doesn't undo that, but the Adviser needs to know
+        // exactly who didn't get their credentials so they can use "Resend
+        // Login Email" on the Members page, rather than the wizard silently
+        // implying every invite went out.
+        if (! empty($failedEmails)) {
+            $response->with('warning', 'Accounts were created, but the login-credential email could not be sent to: '.implode(', ', $failedEmails).'. Use "Resend Login Email" on the Members page once mail delivery is working.');
+        }
+
+        return $response;
     }
 
     public function skip(Request $request)

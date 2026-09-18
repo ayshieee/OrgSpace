@@ -13,6 +13,7 @@
         "laravel/tinker": "^2.10.1",
         "maatwebsite/excel": "^4.0",
         "resend/resend-php": "^1.13",
+        "setasign/fpdi-fpdf": "^2.3",
         "tightenco/ziggy": "^2.0"
     },
     "require-dev": {

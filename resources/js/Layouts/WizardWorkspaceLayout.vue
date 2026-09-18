@@ -1,5 +1,6 @@
 <script setup>
 import WizardTopNav from '@/Components/Onboarding/WizardTopNav.vue';
+import FlashMessages from '@/Components/FlashMessages.vue';
 
 defineProps({
     step: { type: String, required: true },
@@ -13,6 +14,7 @@ defineProps({
         <WizardTopNav :current="step" :breadcrumbs="breadcrumbs" />
 
         <main class="mx-auto px-6 py-10" :class="contentClass">
+            <FlashMessages />
             <slot />
         </main>
     </div>

@@ -48,6 +48,7 @@ return [
                 'manage_attendance',
                 'manage_announcements',
                 'manage_files',
+                'manage_library',
                 'view_reports',
                 'view_roster',
             ],

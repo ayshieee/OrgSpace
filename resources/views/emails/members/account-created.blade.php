@@ -17,7 +17,7 @@
         Password: {{ $password }}
     </p>
 
-    <p>You can log in to OrgSpace using the credentials provided above.</p>
+    <p>You can log in to OrgSpace using the credentials provided above. This password is temporary — the first time you log in, you'll be asked to set a permanent password of your own before you can continue.</p>
 
     <p>For your security, please keep your login information confidential and do not share your password with others.</p>
 

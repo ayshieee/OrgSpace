@@ -45,7 +45,7 @@ function requestToJoin() {
         <div v-if="!organization.already_requested"
             class="absolute inset-0 flex items-center justify-center bg-white/95 opacity-0 group-hover:opacity-100 transition-opacity">
             <button type="button" @click="requestToJoin" :disabled="requesting"
-                class="inline-flex items-center rounded-md border border-transparent bg-primary px-4 py-2 text-xs font-semibold text-white hover:bg-primary-700 disabled:opacity-50">
+                class="inline-flex items-center rounded-lg border border-transparent bg-gradient-to-b from-secondary-400 to-secondary-500 px-4 py-2 text-xs font-semibold text-tertiary-900 shadow-soft transition-all duration-200 ease-ios hover:shadow-elevated hover:from-secondary-300 hover:to-secondary-400 active:scale-[0.98] disabled:opacity-50">
                 {{ requesting ? 'Sending…' : 'Request to Join' }}
             </button>
         </div>

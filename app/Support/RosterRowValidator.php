@@ -54,6 +54,14 @@ class RosterRowValidator
             return ['row' => $row, 'status' => 'error', 'errors' => $errors];
         }
 
+        if (! self::domainAcceptsMail($row['email'])) {
+            return [
+                'row' => $row,
+                'status' => 'error',
+                'errors' => ['email' => "This email's domain doesn't appear to accept mail — double-check for typos."],
+            ];
+        }
+
         $email = strtolower($row['email']);
 
         if (in_array($email, $seenEmails, true)) {
@@ -83,5 +91,32 @@ class RosterRowValidator
         }
 
         return ['row' => $row, 'status' => 'new_user', 'errors' => []];
+    }
+
+    /**
+     * A real, honest check: confirms the email's domain has mail-routing
+     * DNS records at all (MX, or a bare A record as a legal fallback), which
+     * catches typo'd/made-up domains before an account is provisioned for
+     * them. This is NOT a mailbox-existence check — that requires an SMTP
+     * RCPT TO probe, which is unreliable and widely blocked by mail
+     * providers, so we don't pretend to do it. Fails open (treats as
+     * acceptable) only if the DNS lookup itself errors — never on a
+     * genuine "no such domain" result.
+     */
+    protected static function domainAcceptsMail(string $email): bool
+    {
+        $domain = substr(strrchr($email, '@'), 1);
+
+        if (! $domain) {
+            return false;
+        }
+
+        try {
+            return checkdnsrr($domain, 'MX') || checkdnsrr($domain, 'A');
+        } catch (\Throwable $e) {
+            report($e);
+
+            return true;
+        }
     }
 }

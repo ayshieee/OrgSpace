@@ -24,6 +24,14 @@
         "@heroicons/vue": "^2.2.0",
         "@lottiefiles/dotlottie-react": "^0.19.15",
         "@lottiefiles/dotlottie-vue": "^0.11.26",
+        "@tiptap/extension-highlight": "^3.31.3",
+        "@tiptap/extension-link": "^3.31.3",
+        "@tiptap/extension-placeholder": "^3.31.3",
+        "@tiptap/extension-underline": "^3.31.3",
+        "@tiptap/pm": "^3.31.3",
+        "@tiptap/starter-kit": "^3.31.3",
+        "@tiptap/vue-3": "^3.31.3",
+        "jsqr": "^1.4.0",
         "qrcode": "^1.5.4"
     },
     "allowScripts": {

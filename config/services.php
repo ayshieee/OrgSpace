@@ -35,4 +35,22 @@ return [
         ],
     ],
 
+    'microsoft' => [
+        'client_id' => env('MICROSOFT_CLIENT_ID'),
+        'client_secret' => env('MICROSOFT_CLIENT_SECRET'),
+        'tenant' => env('MICROSOFT_TENANT_ID', 'common'),
+    ],
+
+    'libreoffice' => [
+        // Differs between this dev box and wherever this app is actually
+        // hosted later — never hardcode the Windows path as a fallback used
+        // in production. `?:` (not the env() default arg) because an empty
+        // string left in .env is a real value to env() — it wouldn't trigger
+        // the default, silently invoking soffice as `""`.
+        'binary' => env('LIBREOFFICE_BINARY') ?: (PHP_OS_FAMILY === 'Windows'
+            ? 'C:\Program Files\LibreOffice\program\soffice.exe'
+            : 'soffice'),
+        'timeout' => env('LIBREOFFICE_TIMEOUT') ?: 60,
+    ],
+
 ];

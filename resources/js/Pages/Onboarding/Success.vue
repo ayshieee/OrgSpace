@@ -20,7 +20,7 @@ defineProps({
                 Activation successful. You can now start managing your members, roles, and campus events.
             </p>
             <Link :href="route('dashboard')"
-                class="mt-6 inline-flex items-center justify-center w-full rounded-md border border-transparent bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-700">
+                class="mt-6 inline-flex items-center justify-center w-full rounded-lg border border-transparent bg-gradient-to-b from-secondary-400 to-secondary-500 px-4 py-2.5 text-sm font-semibold text-tertiary-900 shadow-soft transition-all duration-200 ease-ios hover:shadow-elevated hover:from-secondary-300 hover:to-secondary-400 active:scale-[0.98]">
                 Go to Dashboard &rarr;
             </Link>
         </div>

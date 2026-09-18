@@ -1,9 +1,7 @@
 <script setup>
 import { ref } from 'vue';
-import { Head, Link, usePage } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 import {
-    MagnifyingGlassIcon,
-    BellIcon,
     Cog6ToothIcon,
     StarIcon,
     ClockIcon,
@@ -13,6 +11,7 @@ import {
     UsersIcon,
 } from '@heroicons/vue/24/outline';
 import { orgTypeIcon } from '@/utils/orgTypeIcon';
+import UserMenu from '@/Components/UserMenu.vue';
 
 defineProps({
     manage: { type: Array, required: true },
@@ -21,36 +20,28 @@ defineProps({
     hidden: { type: Array, required: true },
 });
 
-const user = usePage().props.auth.user;
 const hiddenExpanded = ref(true);
 </script>
 
 <template>
     <Head title="My Organizations" />
 
-    <div class="min-h-screen bg-neutral-50 font-sans">
+    <div class="min-h-screen bg-neutral-50 font-sans flex flex-col">
         <!-- Top bar -->
         <header class="bg-white border-b border-neutral-200">
             <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
                 <span class="font-heading font-extrabold text-xl text-primary">OrgSpace</span>
 
                 <div class="flex items-center gap-4">
-                    <MagnifyingGlassIcon class="w-5 h-5 text-tertiary-400" />
-                    <Link :href="route('get-started.show')" class="inline-flex items-center rounded-md border border-transparent bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-700">
+                    <Link :href="route('get-started.show')" class="inline-flex items-center rounded-lg border border-transparent bg-gradient-to-b from-secondary-400 to-secondary-500 px-4 py-2 text-sm font-semibold text-tertiary-900 shadow-soft transition-all duration-200 ease-ios hover:shadow-elevated hover:from-secondary-300 hover:to-secondary-400 active:scale-[0.98]">
                         Join or Create Organization
                     </Link>
-                    <BellIcon class="w-5 h-5 text-tertiary-400" />
-                    <Link :href="route('profile.edit')">
-                        <Cog6ToothIcon class="w-5 h-5 text-tertiary-400 hover:text-tertiary-600" />
-                    </Link>
-                    <Link :href="route('profile.edit')" class="w-8 h-8 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center text-sm font-bold">
-                        {{ user.name.charAt(0) }}
-                    </Link>
+                    <UserMenu />
                 </div>
             </div>
         </header>
 
-        <main class="max-w-6xl mx-auto px-6 py-10">
+        <main class="max-w-6xl mx-auto px-6 py-10 flex-1 w-full">
             <h1 class="font-heading text-2xl font-extrabold text-tertiary-900 tracking-tight">My Organizations</h1>
             <p class="mt-1 text-sm text-tertiary-500">Manage your active memberships and administrative roles.</p>
 
@@ -59,13 +50,14 @@ const hiddenExpanded = ref(true);
                 <h2 class="flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-tertiary-500 mb-3">
                     <Cog6ToothIcon class="w-4 h-4 text-primary-500" /> Manage
                 </h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     <Link v-for="org in manage" :key="org.id" :href="route('organizations.dashboard', org.id)"
                         class="block bg-white rounded-xl border border-neutral-200 border-l-4 border-l-primary p-4 hover:shadow-md transition-shadow">
                         <div class="flex items-start justify-between">
                             <div class="flex items-start gap-3">
-                                <div class="w-10 h-10 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center shrink-0">
-                                    <component :is="orgTypeIcon(org.type)" class="w-5 h-5" />
+                                <div class="w-10 h-10 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center shrink-0 overflow-hidden">
+                                    <img v-if="org.logo_path" :src="`/storage/${org.logo_path}`" class="w-full h-full object-cover" :alt="org.name" />
+                                    <component v-else :is="orgTypeIcon(org.type)" class="w-5 h-5" />
                                 </div>
                                 <div>
                                     <p class="font-heading font-bold text-tertiary-900">{{ org.name }}</p>
@@ -86,12 +78,13 @@ const hiddenExpanded = ref(true);
                 <h2 class="flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-tertiary-500 mb-3">
                     <StarIcon class="w-4 h-4 text-secondary-500" /> Member of
                 </h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     <Link v-for="org in memberOf" :key="org.id" :href="route('organizations.dashboard', org.id)"
                         class="block bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-md transition-shadow">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-lg bg-neutral-100 text-tertiary-500 flex items-center justify-center shrink-0">
-                                <component :is="orgTypeIcon(org.type)" class="w-5 h-5" />
+                            <div class="w-10 h-10 rounded-lg bg-neutral-100 text-tertiary-500 flex items-center justify-center shrink-0 overflow-hidden">
+                                <img v-if="org.logo_path" :src="`/storage/${org.logo_path}`" class="w-full h-full object-cover" :alt="org.name" />
+                                <component v-else :is="orgTypeIcon(org.type)" class="w-5 h-5" />
                             </div>
                             <div>
                                 <p class="font-heading font-bold text-tertiary-900">{{ org.name }}</p>
@@ -107,12 +100,13 @@ const hiddenExpanded = ref(true);
                 <h2 class="flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-tertiary-500 mb-3">
                     <ClockIcon class="w-4 h-4 text-secondary-500" /> Pending Requests
                 </h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div v-for="org in pendingRequests" :key="org.id" class="bg-white rounded-xl border border-neutral-200 p-4">
                         <div class="flex items-start justify-between">
                             <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-lg bg-neutral-100 text-tertiary-500 flex items-center justify-center shrink-0">
-                                    <component :is="orgTypeIcon(org.type)" class="w-5 h-5" />
+                                <div class="w-10 h-10 rounded-lg bg-neutral-100 text-tertiary-500 flex items-center justify-center shrink-0 overflow-hidden">
+                                    <img v-if="org.logo_path" :src="`/storage/${org.logo_path}`" class="w-full h-full object-cover" :alt="org.name" />
+                                    <component v-else :is="orgTypeIcon(org.type)" class="w-5 h-5" />
                                 </div>
                                 <div>
                                     <p class="font-heading font-bold text-tertiary-900">{{ org.name }}</p>
@@ -133,12 +127,13 @@ const hiddenExpanded = ref(true);
                     </span>
                     <component :is="hiddenExpanded ? ChevronUpIcon : ChevronDownIcon" class="w-4 h-4" />
                 </button>
-                <div v-if="hiddenExpanded" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div v-if="hiddenExpanded" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div v-for="org in hidden" :key="org.id" class="bg-neutral-100 rounded-xl border border-neutral-200 p-4 opacity-70">
                         <div class="flex items-start justify-between">
                             <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-lg bg-neutral-200 text-tertiary-400 flex items-center justify-center shrink-0">
-                                    <component :is="orgTypeIcon(org.type)" class="w-5 h-5" />
+                                <div class="w-10 h-10 rounded-lg bg-neutral-200 text-tertiary-400 flex items-center justify-center shrink-0 overflow-hidden">
+                                    <img v-if="org.logo_path" :src="`/storage/${org.logo_path}`" class="w-full h-full object-cover" :alt="org.name" />
+                                    <component v-else :is="orgTypeIcon(org.type)" class="w-5 h-5" />
                                 </div>
                                 <div>
                                     <p class="font-heading font-bold text-tertiary-600">{{ org.name }}</p>

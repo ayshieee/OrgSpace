@@ -13,6 +13,7 @@ class Announcement extends Model
 
     protected $casts = [
         'is_pinned' => 'boolean',
+        'is_important' => 'boolean',
     ];
 
     public function organization()
@@ -28,5 +29,30 @@ class Announcement extends Model
     public function reads()
     {
         return $this->hasMany(AnnouncementRead::class);
+    }
+
+    public function attachments()
+    {
+        return $this->hasMany(AnnouncementAttachment::class);
+    }
+
+    /**
+     * Top-level comments only, for display — creating a comment (including a
+     * reply) goes through allComments() instead, since this relation's
+     * whereNull scope would otherwise fight an explicit parent_id.
+     */
+    public function comments()
+    {
+        return $this->hasMany(AnnouncementComment::class)->whereNull('parent_id')->oldest();
+    }
+
+    public function allComments()
+    {
+        return $this->hasMany(AnnouncementComment::class);
+    }
+
+    public function reactions()
+    {
+        return $this->hasMany(AnnouncementReaction::class);
     }
 }

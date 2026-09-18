@@ -13,6 +13,8 @@ class AttendanceRecord extends Model
 
     protected $casts = [
         'marked_at' => 'datetime',
+        'excuse_submitted_at' => 'datetime',
+        'excuse_reviewed_at' => 'datetime',
     ];
 
     public function session()
@@ -28,5 +30,10 @@ class AttendanceRecord extends Model
     public function marker()
     {
         return $this->belongsTo(User::class, 'marked_by');
+    }
+
+    public function excuseReviewer()
+    {
+        return $this->belongsTo(User::class, 'excuse_reviewed_by');
     }
 }

@@ -38,7 +38,7 @@ const activeTab = ref('general');
 const form = useForm({
     name: props.organization.name,
     logo: null,
-    primary_color: props.organization.branding?.primary_color || '#0047AB',
+    primary_color: props.organization.branding?.primary_color || '#2E418D',
     is_public: props.organization.is_public,
 });
 const submit = () => form.post(route('organization.settings.update'), { forceFormData: true });
@@ -113,7 +113,7 @@ function archive() {
             <div>
                 <!-- General -->
                 <div v-if="activeTab === 'general'" class="space-y-6">
-                    <form @submit.prevent="submit" class="bg-white border border-neutral-200 rounded-xl p-6 space-y-6">
+                    <form @submit.prevent="submit" class="bg-white border border-neutral-200/60 rounded-2xl shadow-soft hover:shadow-elevated transition-shadow duration-300 p-6 space-y-6">
                         <h3 class="font-heading font-bold text-tertiary-900">Basic Information</h3>
                         <div>
                             <InputLabel for="name" value="Organization Name" />
@@ -136,7 +136,7 @@ function archive() {
                         </div>
                     </form>
 
-                    <div class="bg-white border border-neutral-200 rounded-xl p-6">
+                    <div class="bg-white border border-neutral-200/60 rounded-2xl shadow-soft hover:shadow-elevated transition-shadow duration-300 p-6">
                         <h3 class="font-heading font-bold text-tertiary-900 mb-4">Visibility & Join Code</h3>
                         <div class="flex items-center justify-between py-2">
                             <div>
@@ -164,7 +164,7 @@ function archive() {
                 </div>
 
                 <!-- Roles & Permissions Matrix -->
-                <div v-else-if="activeTab === 'roles'" class="bg-white border border-neutral-200 rounded-xl p-5">
+                <div v-else-if="activeTab === 'roles'" class="bg-white border border-neutral-200/60 rounded-2xl shadow-soft hover:shadow-elevated transition-shadow duration-300 p-5">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="font-heading font-bold text-tertiary-900">Roles & Permissions Matrix</h3>
                         <button type="button" @click="addCustomRole" class="inline-flex items-center gap-1.5 text-sm font-semibold text-primary-600 hover:text-primary-700">
@@ -209,7 +209,7 @@ function archive() {
                 </div>
 
                 <!-- Feature Modules -->
-                <div v-else-if="activeTab === 'modules'" class="bg-white border border-neutral-200 rounded-xl p-5">
+                <div v-else-if="activeTab === 'modules'" class="bg-white border border-neutral-200/60 rounded-2xl shadow-soft hover:shadow-elevated transition-shadow duration-300 p-5">
                     <h3 class="font-heading font-bold text-tertiary-900 mb-4">Feature Modules</h3>
                     <div class="divide-y divide-neutral-100">
                         <div v-for="mod in modules" :key="mod.key" class="flex items-center justify-between gap-4 py-3.5">

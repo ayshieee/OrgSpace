@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import {
     UsersIcon,
@@ -96,7 +96,7 @@ function respond(requestId, action) {
             <!-- Left column -->
             <div class="lg:col-span-2 space-y-6">
                 <!-- Pending Approvals -->
-                <div v-if="canReview" id="pending-approvals" class="bg-white border border-neutral-200 rounded-xl scroll-mt-6">
+                <div v-if="canReview" id="pending-approvals" class="bg-white border border-neutral-200/60 rounded-2xl shadow-soft hover:shadow-elevated transition-shadow duration-300 scroll-mt-6">
                     <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-100">
                         <h2 class="font-heading font-bold text-tertiary-900">Pending Approvals</h2>
                         <span v-if="pendingApprovals.length" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-secondary-100 text-secondary-700">
@@ -113,7 +113,7 @@ function respond(requestId, action) {
                             </div>
                             <div class="flex items-center gap-2 shrink-0">
                                 <button type="button" :disabled="processingId === req.id" @click="respond(req.id, 'approve')"
-                                    class="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary-700 disabled:opacity-50">
+                                    class="inline-flex items-center gap-1 rounded-md bg-gradient-to-b from-secondary-400 to-secondary-500 px-3 py-1.5 text-xs font-semibold text-tertiary-900 shadow-sm transition-all duration-200 ease-ios hover:shadow-soft hover:from-secondary-300 hover:to-secondary-400 disabled:opacity-50">
                                     <CheckIconSolid class="w-3.5 h-3.5" /> Approve
                                 </button>
                                 <button type="button" :disabled="processingId === req.id" @click="respond(req.id, 'deny')"
@@ -131,7 +131,7 @@ function respond(requestId, action) {
                 </div>
 
                 <!-- Activity Feed -->
-                <div class="bg-white border border-neutral-200 rounded-xl">
+                <div class="bg-white border border-neutral-200/60 rounded-2xl shadow-soft hover:shadow-elevated transition-shadow duration-300">
                     <div class="px-5 py-4 border-b border-neutral-100">
                         <h2 class="font-heading font-bold text-tertiary-900">Org-Wide Activity</h2>
                     </div>
@@ -153,7 +153,7 @@ function respond(requestId, action) {
             <!-- Right column -->
             <div class="space-y-6">
                 <!-- Role Governance -->
-                <div class="bg-white border border-neutral-200 rounded-xl p-5">
+                <div class="bg-white border border-neutral-200/60 rounded-2xl shadow-soft hover:shadow-elevated transition-shadow duration-300 p-5">
                     <h2 class="font-heading font-bold text-tertiary-900 mb-4">Role Governance</h2>
 
                     <div v-if="roles.length && stats.total_members > 0">
@@ -205,7 +205,7 @@ function respond(requestId, action) {
                 </div>
 
                 <!-- Feature Modules -->
-                <div class="bg-white border border-neutral-200 rounded-xl p-5">
+                <div class="bg-white border border-neutral-200/60 rounded-2xl shadow-soft hover:shadow-elevated transition-shadow duration-300 p-5">
                     <div class="flex items-center justify-between mb-4">
                         <h2 class="font-heading font-bold text-tertiary-900">Feature Modules</h2>
                         <span class="text-xs font-semibold text-tertiary-400">{{ stats.enabled_modules }}/{{ stats.total_modules }}</span>

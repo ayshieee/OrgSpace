@@ -36,6 +36,11 @@ class Event extends Model
         return $this->hasMany(EventRsvp::class);
     }
 
+    public function checklistItems()
+    {
+        return $this->hasMany(EventChecklistItem::class)->orderBy('sort_order');
+    }
+
     public function isPast(): bool
     {
         return ($this->ends_at ?? $this->starts_at)->isPast();

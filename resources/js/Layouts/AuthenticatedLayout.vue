@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { computed } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import {
     HomeIcon,
@@ -8,38 +8,23 @@ import {
     MegaphoneIcon,
     FolderIcon,
     CalendarDaysIcon,
+    MusicalNoteIcon,
     Cog6ToothIcon,
     MagnifyingGlassIcon,
     BellIcon,
-    ChevronDownIcon,
-    Squares2X2Icon,
-    ClipboardDocumentCheckIcon,
+    ChevronLeftIcon,
 } from '@heroicons/vue/24/outline';
-import { getInitials, colorForId } from '@/utils/initials';
-
-const vClickOutside = {
-    mounted(el, binding) {
-        el.__clickOutsideHandler__ = (event) => {
-            if (!el.contains(event.target)) {
-                binding.value(event);
-            }
-        };
-        document.addEventListener('mousedown', el.__clickOutsideHandler__);
-    },
-    unmounted(el) {
-        document.removeEventListener('mousedown', el.__clickOutsideHandler__);
-    },
-};
+import { orgTypeIcon } from '@/utils/orgTypeIcon';
+import FlashMessages from '@/Components/FlashMessages.vue';
+import UserMenu from '@/Components/UserMenu.vue';
 
 const page = usePage();
-const user = computed(() => page.props.auth.user);
 const organization = computed(() => page.props.auth.organization);
 const permissions = computed(() => page.props.auth.permissions ?? []);
 const enabledModules = computed(() => page.props.auth.enabledModules ?? []);
+const unreadNotifications = computed(() => page.props.auth.unread_notifications_count ?? 0);
 
 const canManageSettings = computed(() => permissions.value.includes('manage_org_settings'));
-const canReviewRequests = computed(() => permissions.value.includes('manage_roster'));
-const showQuickActions = computed(() => canManageSettings.value || canReviewRequests.value);
 
 const navItems = computed(() => {
     if (!organization.value) return [];
@@ -52,6 +37,7 @@ const navItems = computed(() => {
         { key: 'announcements', label: 'Announcements', icon: MegaphoneIcon, href: route('organizations.announcements.index', orgId) },
         { key: 'files', label: 'Files', icon: FolderIcon, href: route('organizations.files.index', orgId) },
         { key: 'events', label: 'Events', icon: CalendarDaysIcon, href: route('organizations.events.index', orgId) },
+        { key: 'music_library', label: 'Music Library', icon: MusicalNoteIcon, href: route('organizations.music.index', orgId) },
     ];
 
     return items
@@ -60,22 +46,27 @@ const navItems = computed(() => {
 });
 
 const isCurrent = (href) => href && page.url.startsWith(new URL(href, window.location.origin).pathname);
-
-const quickActionsOpen = ref(false);
-const userMenuOpen = ref(false);
 </script>
 
 <template>
-    <div class="flex h-screen bg-neutral-50 font-sans text-tertiary-800">
+    <div class="flex h-screen bg-neutral-50 font-sans text-tertiary-800 animate-fade-in-up">
         <!-- Sidebar -->
-        <aside class="w-64 bg-primary border-r border-primary-800 flex-col hidden md:flex shrink-0">
-            <div class="h-16 px-5 flex items-center border-b border-primary-500/30 shrink-0">
-                <Link :href="route('dashboard')" class="font-heading font-extrabold text-2xl tracking-tight text-white">OrgSpace</Link>
+        <aside class="w-64 bg-gradient-to-b from-primary-500 via-primary to-primary-800 border-r border-primary-800 flex-col hidden md:flex shrink-0">
+            <!-- Back to Spaces -->
+            <div class="px-5 pt-5 pb-3 shrink-0">
+                <Link :href="route('dashboard')"
+                    class="inline-flex items-center gap-1 text-xs font-semibold text-primary-200 hover:text-white transition-colors duration-200">
+                    <ChevronLeftIcon class="w-3.5 h-3.5" /> Spaces
+                </Link>
             </div>
 
-            <div v-if="organization" class="px-5 py-4 border-b border-primary-500/30">
-                <Link :href="route('dashboard')" class="text-xs text-primary-200 hover:text-white font-medium">&larr; My Organizations</Link>
-                <div class="font-heading font-bold text-white truncate mt-1">{{ organization.name }}</div>
+            <!-- Organization identity -->
+            <div v-if="organization" class="px-5 pb-4 border-b border-primary-500/30 flex items-center gap-3 shrink-0">
+                <div class="w-14 h-14 rounded-2xl overflow-hidden bg-white/15 ring-1 ring-white/20 flex items-center justify-center shrink-0">
+                    <img v-if="organization.logo_path" :src="`/storage/${organization.logo_path}`" class="w-full h-full object-cover" :alt="organization.name" />
+                    <component v-else :is="orgTypeIcon(organization.type)" class="w-7 h-7 text-white" />
+                </div>
+                <p class="font-heading font-bold text-white leading-tight break-words">{{ organization.name }}</p>
             </div>
 
             <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
@@ -83,8 +74,8 @@ const userMenuOpen = ref(false);
                     <Link
                         v-if="item.available"
                         :href="item.href"
-                        class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors border-l-2"
-                        :class="isCurrent(item.href) ? 'bg-white/12 text-white border-secondary-400' : 'text-primary-100 border-transparent hover:bg-white/10 hover:text-white'"
+                        class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ease-ios border-l-[3px]"
+                        :class="isCurrent(item.href) ? 'bg-white text-primary-700 font-semibold border-secondary-400 shadow-elevated' : 'text-primary-100 border-transparent hover:bg-white/10 hover:text-white hover:translate-x-0.5'"
                     >
                         <component :is="item.icon" class="w-4 h-4" />
                         {{ item.label }}
@@ -104,9 +95,6 @@ const userMenuOpen = ref(false);
                     class="flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-primary-100 hover:bg-white/10 hover:text-white rounded-lg transition-colors">
                     <Cog6ToothIcon class="w-4 h-4" /> Organization Settings
                 </Link>
-                <Link :href="route('profile.edit')" class="flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-primary-100 hover:bg-white/10 hover:text-white rounded-lg transition-colors">
-                    Account Settings
-                </Link>
                 <Link :href="route('logout')" method="post" as="button" class="w-full text-left flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-red-300 hover:bg-white/10 hover:text-red-200 rounded-lg transition-colors">
                     Log Out
                 </Link>
@@ -116,7 +104,7 @@ const userMenuOpen = ref(false);
         <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-hidden">
             <!-- Topbar -->
-            <header class="h-16 bg-white border-b border-neutral-200 flex items-center justify-between px-6 shrink-0">
+            <header class="h-16 bg-white/90 backdrop-blur-xl border-b border-neutral-200 flex items-center justify-between px-6 shrink-0 shadow-soft">
                 <div>
                     <p class="text-xs text-tertiary-400 font-medium">OrgSpace / <span class="text-tertiary-600"><slot name="header" /></span></p>
                 </div>
@@ -125,46 +113,24 @@ const userMenuOpen = ref(false);
                     <div class="relative hidden lg:block">
                         <MagnifyingGlassIcon class="w-4 h-4 text-tertiary-300 absolute left-3 top-1/2 -translate-y-1/2" />
                         <input type="text" disabled placeholder="Search workspace… (coming soon)"
-                            class="w-64 pl-9 pr-3 py-2 text-sm rounded-md border-neutral-200 bg-neutral-50 text-tertiary-400 placeholder:text-tertiary-300 cursor-not-allowed" />
+                            class="w-64 pl-9 pr-3 py-2 text-sm rounded-lg border-neutral-200 bg-neutral-50 text-tertiary-400 placeholder:text-tertiary-300 cursor-not-allowed" />
                     </div>
 
-                    <button type="button" title="Notifications (coming soon)" class="p-2 rounded-md text-tertiary-400 hover:bg-neutral-100">
+                    <Link :href="route('notifications.index')" title="Notifications" class="relative p-2 rounded-lg text-tertiary-400 hover:bg-neutral-100 transition-colors duration-200">
                         <BellIcon class="w-5 h-5" />
-                    </button>
+                        <span v-if="unreadNotifications > 0"
+                            class="absolute top-1 right-1 min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
+                            {{ unreadNotifications > 9 ? '9+' : unreadNotifications }}
+                        </span>
+                    </Link>
 
-                    <div v-if="showQuickActions" class="relative" v-click-outside="() => (quickActionsOpen = false)">
-                        <button type="button" @click="quickActionsOpen = !quickActionsOpen"
-                            class="inline-flex items-center gap-1.5 rounded-md bg-primary px-3.5 py-2 text-xs font-semibold uppercase tracking-wide text-white hover:bg-primary-700">
-                            <Squares2X2Icon class="w-4 h-4" /> Quick Actions <ChevronDownIcon class="w-3.5 h-3.5" />
-                        </button>
-                        <div v-if="quickActionsOpen"
-                            class="absolute right-0 mt-2 w-56 bg-white border border-neutral-200 rounded-lg shadow-lg py-1.5 z-20">
-                            <Link v-if="canReviewRequests && organization" :href="`${route('organizations.dashboard', organization.id)}#pending-approvals`"
-                                class="flex items-center gap-2 px-3.5 py-2 text-sm text-tertiary-700 hover:bg-neutral-50" @click="quickActionsOpen = false">
-                                <ClipboardDocumentCheckIcon class="w-4 h-4 text-tertiary-400" /> Review Join Requests
-                            </Link>
-                            <Link v-if="canManageSettings" :href="route('organization.settings.show')"
-                                class="flex items-center gap-2 px-3.5 py-2 text-sm text-tertiary-700 hover:bg-neutral-50" @click="quickActionsOpen = false">
-                                <Cog6ToothIcon class="w-4 h-4 text-tertiary-400" /> Organization Settings
-                            </Link>
-                        </div>
-                    </div>
-
-                    <div class="relative" v-click-outside="() => (userMenuOpen = false)">
-                        <button type="button" @click="userMenuOpen = !userMenuOpen" class="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold shrink-0" :class="colorForId(user.id)">
-                            {{ getInitials(user.name) }}
-                        </button>
-                        <div v-if="userMenuOpen"
-                            class="absolute right-0 mt-2 w-48 bg-white border border-neutral-200 rounded-lg shadow-lg py-1.5 z-20">
-                            <Link :href="route('profile.edit')" class="block px-3.5 py-2 text-sm text-tertiary-700 hover:bg-neutral-50">Account Settings</Link>
-                            <Link :href="route('logout')" method="post" as="button" class="w-full text-left block px-3.5 py-2 text-sm text-red-500 hover:bg-red-50">Log Out</Link>
-                        </div>
-                    </div>
+                    <UserMenu />
                 </div>
             </header>
 
             <!-- Page Content -->
             <main class="flex-1 overflow-x-hidden overflow-y-auto p-6 bg-neutral-50">
+                <FlashMessages />
                 <slot />
             </main>
         </div>
