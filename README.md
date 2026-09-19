@@ -1,6 +1,6 @@
 # OrgSpace
 
-OrgSpace is a web platform for running student and campus organizations — academic clubs, student councils, fraternities/sororities, sports clubs, performing-arts ensembles, and community-service groups. Each organization gets its own configurable hub: a member roster, role-based permissions, and a set of feature modules it can turn on or off (announcements, events, attendance, file storage, a music library, and dues/finance tracking).
+OrgSpace is a web platform for running student and campus organizations — academic clubs, student councils, sports clubs, performing-arts ensembles, and community-service groups. Each organization gets its own configurable hub: a member roster, role-based permissions, and a set of feature modules it can turn on or off (announcements, events, attendance, file storage, a music library, and dues/finance tracking).
 
 The platform is multi-tenant: a single OrgSpace installation hosts many independent organizations, and a user can belong to more than one.
 
