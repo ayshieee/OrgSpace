@@ -1,59 +1,70 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# OrgSpace
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+OrgSpace is a web platform for running student and campus organizations — academic clubs, student councils, fraternities/sororities, sports clubs, performing-arts ensembles, and community-service groups. Each organization gets its own configurable hub: a member roster, role-based permissions, and a set of feature modules it can turn on or off (announcements, events, attendance, file storage, a music library, and dues/finance tracking).
 
-## About Laravel
+The platform is multi-tenant: a single OrgSpace installation hosts many independent organizations, and a user can belong to more than one.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## How it works
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+**Onboarding.** A new organization is created through a guided, multi-step wizard: set up the organization profile, define roles, import or invite members, choose which feature modules to enable, then review and activate.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+**Roles & permissions.** Every organization defines its own roles, each holding a set of permissions (manage settings, manage roles, manage roster, manage events, manage attendance, manage announcements, manage files, manage finance, manage the music library, view reports, manage modules, view roster). Three starting templates are provided:
+- **Adviser** — full access to everything.
+- **Officer** — day-to-day operational permissions.
+- **Member** — read-only roster access.
 
-## Learning Laravel
+Permissions are enforced at the route level, and modules that an organization hasn't enabled are inaccessible even to members with permission, until an admin turns them on.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+**Feature modules.**
+- **Member Management** — the roster and core membership data; always on.
+- **Announcements** — posts with attachments, threaded comments, emoji reactions, and read receipts.
+- **Events & Calendar** — event scheduling with RSVPs and checklists.
+- **Attendance Tracking** — QR-code based check-in sessions, with phone scanning and manual excuse handling.
+- **Secure Files** — folders and files with per-file access tiers, watermarking, and optional Microsoft 365/Azure AD "Open in Office" integration.
+- **Music Library** — sheet-music storage with on-canvas annotations and favorites, aimed at performing-arts organizations.
+- **Finance & Dues** — budget and fee tracking (module scaffolding in place).
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Alongside the modules, every user has a **join flow** (join by invite code or request-to-join with officer approval), a **notification center**, and a **profile** (avatar, education history, and a forced password-change flow for admin-provisioned accounts).
 
-## Laravel Sponsors
+## Tech stack
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+- **Backend:** Laravel 12 (PHP ^8.2)
+- **Frontend:** Inertia.js v2 + Vue 3, Tailwind CSS 3, Vite 7
+- **Auth:** Laravel Breeze (Inertia/Vue stack), extended with a forced password-change flow
+- **Database:** SQLite by default (configurable to any Laravel-supported driver)
+- **Other notable packages:** Tiptap (rich text for announcements), `qrcode`/`jsqr` (attendance QR flow), `maatwebsite/excel` (roster import/export), `resend/resend-php` (transactional email), `setasign/fpdi-fpdf` (PDF watermarking), Ziggy (Laravel routes in JS)
 
-### Premium Partners
+## Getting started
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### Requirements
+- PHP 8.2+
+- Composer
+- Node.js 18+ and npm
 
-## Contributing
+### Setup
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```bash
+composer install
+npm install
+cp .env.example .env
+php artisan key:generate
+touch database/database.sqlite   # if using the default SQLite driver
+php artisan migrate
+npm run build   # or `npm run dev` for hot-reloading during development
+php artisan serve
+```
 
-## Code of Conduct
+Then visit the URL printed by `artisan serve` (defaults to `http://127.0.0.1:8000`).
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Configuration notes
+- Feature module definitions live in `config/modules.php`; the permission catalog lives in `config/permissions.php`; organization types live in `config/organization.php`.
+- Mail defaults to SMTP; a Resend API key can be used instead by switching `MAIL_MAILER`.
+- Queue, cache, and session all default to the `database` driver, so no extra services (Redis, Memcached) are required to run locally.
 
-## Security Vulnerabilities
+## Project structure
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+- `app/Http/Controllers/{Auth,Onboarding,Membership,Organization,Profile}` — controllers grouped by domain area.
+- `app/Models` — `Organization`, `OrganizationMember`, `Role`/`RolePermission`, `OrgFeature`, `Announcement` (+ comments/reactions/attachments), `Event`/`EventRsvp`, `AttendanceSession`/`AttendanceRecord`, `OrgFile`, `MusicEntry`, and related models.
+- `resources/js/Pages` — Inertia page components, mirroring the route structure (`Onboarding/*`, `Organizations/{Announcements,Events,Files,Music,Attendance,Members}/*`, `Profile`, `Auth`, `Notifications`).
+- `resources/js/Components` — shared UI components, grouped by feature area.
+- `database/migrations` — full schema history for organizations, roles, and every feature module.
